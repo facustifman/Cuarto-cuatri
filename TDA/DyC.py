@@ -98,3 +98,130 @@ def contar_ocurrencias(arr, num, izq, der):
         if arr[i] == num:
             count += 1
     return count
+
+
+"""7-Implementar un algoritmo que dados n puntos en un plano, busque la pareja que se encuentre más cercana, por división y conquista, con un orden de complejidad mejor que O(n^2). Justificar la complejidad del algoritmo mediante el teorema maestro.
+
+"""
+
+
+def puntos_mas_cercanos(puntos):
+    if len(puntos) < 2:
+        return float("inf"), None, None
+    puntos.sort(key=lambda x: x[0])
+    return _puntos_mas_cercanos_rec(puntos, 0, len(puntos) - 1)
+
+
+def _puntos_mas_cercanos_rec(puntos, izq, der):
+    if der - izq <= 3:
+        return _puntos_mas_cercanos_bruto(puntos, izq, der)
+
+    mid = (izq + der) // 2
+    d_izquierda, p1_izq, p2_izq = _puntos_mas_cercanos_rec(puntos, izq, mid)
+    d_derecha, p1_der, p2_der = _puntos_mas_cercanos_rec(puntos, mid + 1, der)
+
+    d_min = min(d_izquierda, d_derecha)
+    p1_min = p1_izq if d_izquierda < d_derecha else p1_der
+    p2_min = p2_izq if d_izquierda < d_derecha else p2_der
+
+    banda = [p for p in puntos if abs(p[0] - puntos[mid][0]) < d_min]
+    banda.sort(key=lambda x: x[1])
+
+    for i in range(len(banda)):
+        for j in range(i + 1, min(i + 7, len(banda))):
+            d = distancia(banda[i], banda[j])
+            if d < d_min:
+                d_min = d
+                p1_min, p2_min = banda[i], banda[j]
+
+    return d_min, p1_min, p2_min
+
+
+def distancia(p1, p2):
+    return ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** 0.5
+
+
+def _puntos_mas_cercanos_bruto(puntos, izq, der):
+    d_min = float("inf")
+    p1_min = p2_min = None
+    for i in range(izq, der + 1):
+        for j in range(i + 1, der + 1):
+            d = distancia(puntos[i], puntos[j])
+            if d < d_min:
+                d_min = d
+                p1_min, p2_min = puntos[i], puntos[j]
+    return d_min, p1_min, p2_min
+
+
+"""8- Dados un conjunto de n elementos, y 2 arreglos de longitud n, con dichos elementos. El arreglo A está completamente ordenado de menor a mayor. El arreglo B se encuentra desordenado. Indicar, por división y conquista, la cantidad de inversioes necesarias al arreglo B para que quede ordenado de menor a mayor, con un orden de complejidad mejor que O(n^2). Justificar la complejidad del algoritmo mediante el teorema maestro."""
+
+
+def contar_inversiones(A, B):
+    if len(A) != len(B):
+        raise ValueError("Los arreglos deben tener la misma longitud")
+    return _contar_inversiones_rec(A, B, 0, len(A) - 1)
+
+
+def _contar_inversiones_rec(A, B, izq, der):
+    if izq >= der:
+        return 0
+
+    mid = (izq + der) // 2
+    inv_izquierda = _contar_inversiones_rec(A, B, izq, mid)
+    inv_derecha = _contar_inversiones_rec(A, B, mid + 1, der)
+    inv_merge = _contar_inversiones_merge(A, B, izq, mid, der)
+
+    return inv_izquierda + inv_derecha + inv_merge
+
+
+def _contar_inversiones_merge(A, B, izq, mid, der):
+    i = izq
+    j = mid + 1
+    k = izq
+    inversions = 0
+
+    while i <= mid and j <= der:
+        if B[i] <= B[j]:
+            A[k] = B[i]
+            i += 1
+        else:
+            A[k] = B[j]
+            inversions += mid - i + 1
+            j += 1
+        k += 1
+
+    while i <= mid:
+        A[k] = B[i]
+        i += 1
+        k += 1
+
+    while j <= der:
+        A[k] = B[j]
+        j += 1
+        k += 1
+
+    return inversions
+
+
+"""12- Tenemos un arreglo de tamaño 2n de la forma {C1, C2, C3, … Cn, D1, D2, D3, … Dn}, tal que la cantidad total de elementos del arreglo es potencia de 2 (por ende, n también lo es). Implementar un algoritmo de División y Conquista que modifique el arreglo de tal forma que quede con la forma {C1, D1, C2, D2, C3, D3, …, Cn, Dn}, sin utilizar espacio adicional (obviando el utilizado por la recursividad y variables de tipos simples). ¿Cual es la complejidad del algoritmo?"""
+
+
+def alternar(arr):
+    _alternar_rec(arr, 0, len(arr) - 1)
+    return arr
+
+
+def _alternar_rec(arr, izq, der):
+    n = der - izq + 1
+    if n <= 2:
+        return
+
+    m = n // 2
+    for i in range(m // 2):
+        arr[izq + m // 2 + i], arr[izq + m + i] = (
+            arr[izq + m + i],
+            arr[izq + m // 2 + i],
+        )
+
+    _alternar_rec(arr, izq, izq + m - 1)
+    _alternar_rec(arr, izq + m, der)
