@@ -31,8 +31,56 @@ Por lo tanto, se necesitan aproximadamente **6 iteraciones** para alcanzar la pr
 
 ![alt text](image-9.png)
 
+- **Metodo de Newton-Raphson**: Se calcula la raiz de la tangente
+
+$$x_{nr} = x_n - \frac{f(x_n)}{f'(x_n)}$$
+
+![alt text](image-13.png)
+
+$$x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)}$$
+Condicioness que garantizan la convergencia:
+
+- la parte de debajo de la fracción debe ser diferente de 0, es decir, $f'(x_n) \neq 0$.
+- la derivada segunda $f''(x)$ debe conservar el mismo signo en el intervalo considerado, es decir, $f''(x) > 0$ o $f''(x) < 0$ para todo $x$ en el intervalo.
+![alt text](image-14.png)
+
+Ejemplo:
+Encontrar la raíz de $f(x) = e^{-x} - x$ usando Newton-Raphson con $x_0 = 0.5$.
+
+**Derivada:** $f'(x) = -e^{-x} - 1$
+
+| $n$ | $x_n$ | $f(x_n)$ | $f'(x_n)$ | $x_{n+1}$ | Error |
+|-----|-------|----------|-----------|-----------|-------|
+| 0 | 0.50000 | 0.10653 | −1.60653 | 0.56631 | — |
+| 1 | 0.56631 | 0.00347 | −1.56765 | 0.56714 | 0.147% |
+| 2 | 0.56714 | 0.00001 | −1.56714 | **0.56714** | **0.002%** |
+
+Raíz aproximada: $x_r \approx 0.56714$
+
+- **Metodo de Punto Fijo**: Se reescribe la ecuación $f(x) = 0$ en la forma $x = g(x)$ y se itera:
+$$x_{n+1} = g(x_n)$$
+Ejemplo:
+$f(x) = e^{-x} - x$ → $x = e^{-x}$ → $g(x) = e^{-x}$
+![alt text](image-15.png)
+![alt text](image-16.png)
+Condiciones de convergencia para el Método de Punto Fijo:
+
+- La función $g(x)$ debe ser continua en el intervalo $[a, b]$.
+- Se debe cumplir que $|g'(x)| < 1$ para todo $x$ en el intervalo considerado. Esta es la **condición suficiente de convergencia**.
+- Si $|g'(x_n)| < 1$ en la vecindad de la raíz, el método converge.
+- Si $|g'(x)| > 1$, el método diverge.
+
+Para el ejemplo $g(x) = e^{-x}$:
+$$g'(x) = -e^{-x}$$
+
+En $x \approx 0.567$: $|g'(0.567)| = e^{-0.567} \approx 0.567 < 1$ ✓
+
+Por lo tanto, el método converge.
+![alt text](image-17.png)
+![alt text](image-18.png)
 
 ## Práctica
+
 ![alt text](image-10.png)
 
 - **Ejercicio 1**
@@ -40,13 +88,11 @@ Por lo tanto, se necesitan aproximadamente **6 iteraciones** para alcanzar la pr
 El metodo utilizado es Bisección
 ![alt text](image-11.png)
 
-
 **Función:** $f(x)=5x^{3}-5x^{2}+6x-2$, intervalo inicial $[0,1]$.
 
 **Se usa el error estimado relativo porcentual:**
 
 $$E_a(\%)=\left|\frac{m_k-m_{k-1}}{m_k}\right|\cdot 100$$
-
 
 | k | a_k | b_k | m_k = (a_k+b_k)/2 | f(m_k) | E_a (%) |
 |---|-----|-----|--------------------|--------|---------|
