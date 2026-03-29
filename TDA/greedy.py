@@ -48,3 +48,17 @@ def bolsas(capacidad, productos):
         if not colocado:
             bolsas.append([producto])  # Creamos una nueva bolsa para el producto
     return bolsas
+
+"""12- El mafioso arnook, hay que ordenar por km finales y que no se pisen los inicios, """
+#los pedidos son(inicio, fin)
+def asignar_mafias(pedidos):
+    pedidos.sort(key=lambda x: x[1])  # Ordenamos los pedidos por su horario de fin
+    seleccionados = []
+    ultimo_fin = -1
+
+    for inicio, fin in pedidos:
+        if inicio >= ultimo_fin:
+            seleccionados.append((inicio, fin))
+            ultimo_fin = fin
+
+    return seleccionados
