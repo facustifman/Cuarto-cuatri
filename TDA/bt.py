@@ -107,3 +107,48 @@ def es_vc(cover, aristas):
         if a1 not in cover and a2 not in cover:
             return False
     return True
+
+
+"""14- Un set dominante (Dominating Set) de un grafo G es un subconjunto D de vértices de G, tal que para todo vértice de G: o bien
+
+(i) pertenece a D;
+o bien (ii) es adyacente a un vértice en D.
+
+Implementar un algoritmo que reciba un Grafo, y devuelva un dominating set de dicho grafo con la mínima cantidad de vértices."""
+
+
+def dominating_set_min(grafo):
+    mejor = []
+    min_ds = [len(grafo.obtener_vertices())]
+    vertices = grafo.obtener_vertices()
+    bt_dominating_set(grafo, vertices, mejor, min_ds, [], 0)
+    return mejor
+
+
+def bt_dominating_set(grafo, vertices, mejor, min_ds, actual, idx):
+    if len(actual) > min_ds[0]:
+        return
+    if idx == len(vertices):
+        if es_dominante(grafo, actual, vertices):
+            min_ds[0] = len(actual)
+            mejor.clear()
+            mejor.extend(actual)
+        return
+    vertice = vertices[idx]
+    actual.append(vertice)
+    bt_dominating_set(grafo, vertices, mejor, min_ds, actual, idx + 1)
+    actual.pop()
+    bt_dominating_set(grafo, vertices, mejor, min_ds, actual, idx + 1)
+
+
+def es_dominante(grafo, conjunto, vertices):
+
+    for v in vertices:
+        if v in conjunto:
+            continue
+        for ady in grafo.adyacentes(v):
+            if ady in conjunto:
+                break
+        else:
+            return False
+    return True
