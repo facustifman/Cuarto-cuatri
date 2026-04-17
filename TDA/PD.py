@@ -46,22 +46,38 @@ def operaciones(k):
 # Complejidad: O(n) tiempo y espacio.
 # dp[i]= max(dp[i-2] +g[i] , dp[i-1])
 def lunatico(ganancias):
+    n = len(ganancias)
+    if n == 0:
+        return []
+    if n == 1:
+        return [0]
     c_1, gan1 = robos(ganancias, 0)
     c_2, gan2 = robos(ganancias, 1)
-
-    return gan1 if c_1 > c_2 else return gan2
+    return gan1 if c_1 >= c_2 else gan2
 
 def robos(ganancia, casa):
+    # casa=0: excluye la ultima casa → usa ganancia[0..n-2], offset=0
+    # casa=1: excluye la primera casa → usa ganancia[1..n-1], offset=1
+    if casa == 0:
+        g = ganancia[:-1]
+        offset = 0
+    else:
+        g = ganancia[1:]
+        offset = 1
+
     n = len(g)
+    if n == 0:
+        return 0, []
+
     dp = [0] * n
     dp[0] = g[0]
     if n > 1:
         dp[1] = max(g[0], g[1])
     for i in range(2, n):
         dp[i] = max(dp[i - 2] + g[i], dp[i - 1])
-    
+
     rec = []
-    i = n-1
+    i = n - 1
     while i >= 0:
         if i == 0 or dp[i] != dp[i - 1]:
             rec.append(i + offset)
