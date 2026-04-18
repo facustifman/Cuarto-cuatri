@@ -34,7 +34,29 @@ def operaciones(k):
             i -= 1
     return ops[::-1]
 
+"""13 -Un bodegón tiene una única mesa larga con W lugares. Hay una persona en la puerta que anota los grupos que quieren sentarse a comer, y la cantidad de integrantes que conforma a cada uno. Para simplificar su trabajo, se los anota en un vector P donde P[i] contiene la cantidad de personas que integran el grupo i, siendo en total n grupos. Como se trata de un restaurante familiar, las personas sólo se sientan en la mesa si todos los integrantes de su grupo pueden sentarse. Implementar un algoritmo que, mediante programación dinámica, obtenga el conjunto de grupos que ocupan la mayor cantidad de espacios en la mesa (o en otras palabras, que dejan la menor cantidad de espacios vacíos). Indicar y justificar la complejidad del algoritmo."""
 
+#La ecuacion de recurrencia es:
+# dp[i][j]= max(dp[i-1][j], dp[i-1][j-P[i]] + P[i]) si j >= P[i]
+# dp[i][j]= dp[i-1][j] si j < P[i]
+
+def bodegon_dinamico(P, W):
+    n = len(P)
+    dp = [[0] * (W + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        for j in range(W + 1):
+            if P[i - 1] <= j:
+                dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - P[i - 1]] + P[i - 1])
+            else:
+                dp[i][j] = dp[i - 1][j]
+
+    grupos = []
+    j = W
+    for i in range(n, 0, -1):
+        if dp[i][j] != dp[i - 1][j]:
+            grupos.append(i - 1)
+            j -= P[i - 1]
+    return grupos[::-1]
 """14- Somos ayudantes del gran ladrón el Lunático, que está pensando en su próximo atraco. Decidió en este caso robar toda una calle en un barrio privado, que tiene la particularidad de ser circular. Gracias a los trabajos de inteligencia realizados, sabemos cuánto se puede obtener por robar en cada casa. Podemos enumerar a la primer casa como la casa 0, de la cual podríamos obtener g0, la casa a su derecha es la 1, que nos daría g1, y así hasta llegar a la casa n-1, que nos daría gn-1. Toda casa se considera adyacente a las casas i-1 e i+1. Además, como la calle es circular, la casas 0 y n-1 también son vecinas. El problema con el que cuenta el Lunático es que sabe de experiencias anteriores que, si roba en una casa, los vecinos directos se enterarían muy rápido. No le daría tiempo a luego intentar robarles a ellos. Es decir, para robar una casa debe prescindir de robarle a sus vecinos directos. El Lunático nos encarga saber cuáles casas debería atracar y cuál sería la ganancia máxima obtenible. Dado que nosotros nos llevamos un porcentaje de dicha ganancia, vamos a buscar el óptimo a este problema. Implementar un algoritmo que, por programación dinámica, obtenga la ganancia óptima, así como cuáles casas habría que robar, a partir de recibir un arreglo de las ganancias obtenibles. Para esto, escribir y describir la ecuación de recurrencia correspondiente. Indicar y justificar la complejidad del algoritmo propuesto."""
 
 # La calle es circular: casas 0 y n-1 son vecinas, no se pueden robar juntas.
@@ -56,8 +78,6 @@ def lunatico(ganancias):
     return gan1 if c_1 >= c_2 else gan2
 
 def robos(ganancia, casa):
-    # casa=0: excluye la ultima casa → usa ganancia[0..n-2], offset=0
-    # casa=1: excluye la primera casa → usa ganancia[1..n-1], offset=1
     if casa == 0:
         g = ganancia[:-1]
         offset = 0
@@ -85,3 +105,4 @@ def robos(ganancia, casa):
         else:
             i -= 1
     return dp[n - 1], rec[::-1]
+
