@@ -66,3 +66,73 @@ def camino_al_templo(provisiones_iniciales, oasis, distancias, KM_PROVISION):
 
 
 # * La complejidad del algoritmo es O(n log n) debido a la gestión de la estructura de datos Heap para mantener los oasis visitados. El algoritmo es Greedy porque en cada paso toma la decision local de reabastecer en el oasis con mas provisiones disponibles, buscando minimizar el numero de paradas. El algoritmo no siempre da la solucion optima, ya que puede haber casos donde reabastecer en un oasis con menos provisiones pero mas cercano al siguiente oasis pueda ser mejor a largo plazo. Por ejemplo, si el primer oasis tiene 10 provisiones y el segundo tiene 5, pero el segundo está mucho más cerca del siguiente oasis, podría ser mejor reabastecer en el segundo oasis para evitar una parada adicional en el futuro.
+
+
+"""3- Recordamos el problema de Interval Scheduling: Dado un conjunto de charlas a dar, con un horario de inicio y fin cada una, determinar
+la máxima cantidad de charlas a dar de tal forma que no haya solapamiento de horarios entre ninguna de las elegidas (devolviendo
+las charlas que logran esto). Resolver el problema de Interval Scheduling utilizando backtracking."""
+
+def interval_scheduling(charlas):
+    mejor_conjunto = []
+    mejor_cantidad = [0]
+    bt_interval_sheduling(charlas, mejor_conjunto, mejor_cantidad, [], 0)
+    return mejor_conjunto
+
+def bt_interval_sheduling(charlas, mejor_conjunto, mejor_cantidad, actual, idx):
+    if idx == len(charlas):
+        if len(actual) > mejor_cantidad[0]:
+            mejor_conjunto.clear()
+            mejor_conjunto.extend(actual)
+            mejor_cantidad[0] = len(actual)
+        return
+    
+    if no_se_solapa(actual, charlas[idx]):
+        actual.append(charlas[idx])
+        bt_interval_sheduling(charlas, mejor_conjunto, mejor_cantidad, actual, idx + 1)
+        actual.pop()
+    bt_interval_sheduling(charlas, mejor_conjunto, mejor_cantidad, actual, idx + 1)
+    
+def no_se_solapa(conjunto, charla):
+    for c in conjunto:
+        if not (charla.fin <= c.inicio or charla.inicio >= c.fin):
+            return False
+    return True
+
+"""4. Laura está de viaje por Japón y entró a un Centro Pokemon, a comprar merchandising. Va a tratar de llevarse todo lo más valioso
+(para ella) que pueda y que entre en su mochila. Tiene 2 limitaciones. La primera: no puede guardar más peso que lo que permita su
+mochila (tiene límite hasta W). La segunda: como sabe que puede entrar en un estado de locura e inconciencia temporal, se puso
+un límite que no comprará por más de P precio en total (es decir, la suma de todo lo comprado). Cada producto tiene 3 valores
+asociados: su valor (vi
+
+, que Laura definió en base a su subjetividad), su precio (pi) y su peso (wi).
+
+Implementar un algoritmo que, utilizando programación dinámica, permita determinar qué productos debe comprar Laura tal
+que no superen el peso máximo que puede llevar y el precio máximo dispuesto a pagar, y que logre maximizar el valor obtenido
+(dados por la suma de los elementos comprados). También escribir el algoritmo que permita reconstruir la solución.
+Indicar y justificar la complejidad del algoritmo implementado."""
+
+
+#* La ecuacion de recurrencia es: dp[i][w][p]= max(dp[i-1][W][p], dp[i-1][W-wi][p-pi]+vi) si wi<=W y pi<=P, sino dp[i][w][p]=dp[i-1][W][p]
+def mochila_dinamica(productos, W, P):
+    n=len(productos)
+    dp= [[[0 for _ in range(P+1)] for _ in range(W+1)] for _ in range(n+1)]
+    for i in range(1,n+1):
+        vi,pi,wi= productos[i-1]
+        for w in range(W+1):
+            for p in range(P+1):
+                dp[i][w][p]= max(dp[i-1][w][p], dp[i-1][w-wi][p-pi]+vi) if wi<=w and pi<=p else dp[i-1][w][p]
+    return dp
+
+def reconstruccion(dp, productos):
+    i=len(dp)-1
+    w=len(dp[0])-1
+    p=len(dp[0][0])-1
+    productos_comprados=[]
+    while i>0 and w>=0 and p>=0:
+        if dp[i][w][p]!=dp[i-1][w][p]:
+            productos_comprados.append(i-1)
+            vi,pi,wi= productos[i-1]
+            w-=wi
+            p-=pi
+        i-=1
+    return productos_comprados
