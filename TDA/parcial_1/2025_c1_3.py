@@ -82,14 +82,13 @@ Por ejemplo, si el arreglo es [2, 3, 1, 1, 4], la solución óptima es ir desde 
 teniendo máximo 2 desde el inicio), y de allí a la posición 4 (saltando 3 lugares, que es el máximo desde dicha posición), logrando
 llegar al final en 2 saltos."""
 
-#*La ecuacion de recurencia para este problema es: dp[i]= min(dp[j]+1) para todo j tal que i-j <= arr[j] y j < i.  
+#* La ecuacion de recurrencia es: opt[i] = 1 + min(opt[j]) para todo j que permite llegar a i
 
-def min_saltos(arr):
-    n = len(arr)
-    dp = [float('inf')] * n
-    dp[0] = 0
+def min_pasos(pasos):
+    n=len(pasos)
+    opt=[float('inf')]*n
     for i in range(n):
         for j in range(i):
-            if i - j <= arr[j]:
-                dp[i] = min(dp[i], dp[j] + 1)
-    return dp[-1]
+            if pasos[j] + j >= i:
+                opt[i] = min(opt[i], 1 + opt[j])
+    return opt[-1]
