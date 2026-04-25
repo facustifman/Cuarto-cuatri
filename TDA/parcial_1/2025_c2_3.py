@@ -59,3 +59,59 @@ def robo(farmacos, L):
 
 
 # * El algoritmo es Greedy porque en cada decision que se toma busca un optimo local al utilizar la regla de agarrar el que mayor valor/cantidad te da. El algoritmo es optimo porque su construccion se basa en ganancia = valor/cantidad , eso hace que los mas convenientes de agarrar sean siempre los que se muestran al prinicipio del arreglo, por consecuente el liquido restante que se agarra al final es el siguiente en su ganancia.
+
+
+"""3. El problema conocido como Feedback Edge Set (FES) (cómo problema de optimización) indica: Dado un grafo dirigido, obtener la
+menor cantidad de aristas a eliminar de dicho grafo de tal manera que el grafo quede acíclico.
+Implementar un algoritmo que, por backtracking, resuelva el problema. Podés considerar que existe una función tiene_ciclo(grafo,
+vértices) que devuelve true si el grafo tiene algún ciclo en la componente débilmente conexa definida por los vértices pasados por
+parámetro, y también la función componentes_debilmente_conexas(grafo, vertices) que devuelve una lista de listas, cada una
+con una componente débilmente conexa del grafo entre los vértices definidos por parámetro."""
+
+
+def fes(grafo):
+    mejor = []
+    min_sol = [0]
+    vertices = grafo.obtener_vertices()
+    bt_fes(grafo, vertices, mejor, min_sol, [], 0, 0)
+    return mejor
+
+
+def bt_fes(grafo, vertices, mejor, min_sol, actual, cant_actual, idx):
+    if idx == len(vertices):
+        for i in componentes_debilmente_conexas(grafo, actual):  # type: ignore
+            if tiene_ciclos(grafo, i):  # type: ignore
+                return
+        if cant_actual < min_sol[0]:
+            min_sol[0] = cant_actual
+            mejor.clear()
+            mejor.extend(actual)
+
+    vertice = vertices[idx]
+    for w in grafo.adyacentes(vertice):
+        actual.append()
+
+
+def fes(grafo, vertices):
+    mejor = []  # peor caso posible
+    _bt(grafo, vertices, [], mejor)
+    return mejor[0]
+
+
+def _bt(grafo, vertices, eliminadas, mejor):
+    if len(eliminadas) >= len(mejor[0]):
+        return
+
+    for comp in componentes_debilmente_conexas(grafo, vertices):  # type: ignore
+        if tiene_ciclo(grafo, comp):  # type: ignore
+            for v in comp:
+                for w in grafo.adyacentes(v):
+                    if w in comp:
+                        grafo.eliminar_arista(v, w)
+                        eliminadas.append((v, w))
+                        _bt(grafo, vertices, eliminadas, mejor)
+                        eliminadas.pop()
+                        grafo.agregar_arista(v, w)
+            return
+
+    mejor[0] = list(eliminadas)
