@@ -260,3 +260,50 @@ pantalla rectangular de la computadora. El programa que muestra el mapa acepta c
 construir el rectángulo a mostrar: los correspondientes a los límites inferior izquierdo y superior derecho, tal que toda
 la imagen quede dentro de los límites. Implementar un algoritmo que resuelva el problema con complejidad O(log n).
 Justificar adecuadamente la complejidad del algoritmo implementado."""
+
+def area_poligono(n, izq, der):
+    """
+    Búsqueda binaria en arreglo bitónico: O(log n)
+    Encuentra el máximo en un arreglo que crece y luego decrece.
+    Aplicable si las proyecciones forman ese patrón.
+    """
+    if izq >= der:
+        return n[izq]
+    
+    mid = (izq + der) // 2
+    
+    if n[mid] > n[mid - 1]:
+        return area_poligono(n, mid, der)
+    else:
+        return area_poligono(n, izq, mid - 1)
+    
+    
+"""5. Dado un Grafo dirigido, acíclico y pesado, y dos vértices s y t, implementar un algoritmo que, por programación
+dinámica, permita encontrar el camino de peso máximo. Indicar y justificar la complejidad del algoritmo implementado.
+Escribir y describir la ecuación de recurrencia de la solución, y la complejidad del algoritmo implementado. Implementar
+el algoritmo de reconstrucción de la solución, indicando su complejidad."""
+
+#* La ecuacion de recurrencia es: opt[v] = max(opt[u] + peso(u, v)) para todo u adyacente a v. La complejidad del algoritmo es O(V + E) porque se recorre cada vertice y cada arista una sola vez. La reconstruccion de la solucion se hace guardando el vertice anterior al que se llega a cada vertice, y luego recorriendo esos vertices hacia atras desde t hasta s, lo cual tiene complejidad O(V) en el peor caso (si el camino es lineal).
+
+def camino_maximo(grafo, s, t):
+    opt = {v: float("-inf") for v in grafo.obtener_vertices()}
+    opt[s] = 0
+    anterior = {v: None for v in grafo.obtener_vertices()}
+    
+    for vertice in grafo.orden_topologico():
+        for adyacente in grafo.adyacentes(vertice):
+            peso = grafo.peso(vertice, adyacente)
+            if opt[vertice] + peso > opt[adyacente]:
+                opt[adyacente] = opt[vertice] + peso
+                anterior[adyacente] = vertice
+    
+    # Reconstrucción de la solución
+    camino = []
+    actual = t
+    while actual is not None:
+        camino.append(actual)
+        actual = anterior[actual]
+    
+    camino.reverse()
+    
+    return camino, opt[t]
