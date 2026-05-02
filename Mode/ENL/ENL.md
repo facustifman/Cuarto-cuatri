@@ -62,7 +62,9 @@ $$x_{n+1} = g(x_n)$$
 Ejemplo:
 $f(x) = e^{-x} - x$ → $x = e^{-x}$ → $g(x) = e^{-x}$
 ![alt text](image-15.png)
+
 ![alt text](image-16.png)
+
 Condiciones de convergencia para el Método de Punto Fijo:
 
 - La función $g(x)$ debe ser continua en el intervalo $[a, b]$.
