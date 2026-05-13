@@ -52,10 +52,10 @@ Con este criterio, $f$ es la curva que tiene cruces por cero; $g_1$ y $g_2$ son 
 
 **Estimación de raíces de $f$** (leyendo la grilla, escala igual en ambos ejes):
 
-| Raíz | Valor representativo | Cota de error absoluto |
-|------|---------------------|------------------------|
-| $x_1^*$ | $\approx -3.5$ | $\pm 0.5$ (intervalo adecuado: $[-4,\,-3]$) |
-| $x_2^*$ | $\approx 0.8$ | $\pm 0.5$ (intervalo inadecuado dado: $[0.33,\,1.33]$) |
+| Raíz    | Valor representativo | Cota de error absoluto                                 |
+| ------- | -------------------- | ------------------------------------------------------ |
+| $x_1^*$ | $\approx -3.5$       | $\pm 0.5$ (intervalo adecuado: $[-4,\,-3]$)            |
+| $x_2^*$ | $\approx 0.8$        | $\pm 0.5$ (intervalo inadecuado dado: $[0.33,\,1.33]$) |
 
 ## 2b) Convergencia según Teorema de Punto Fijo
 
@@ -199,6 +199,34 @@ $$\lambda_{2,3} = \frac{-3 \pm \sqrt{9+36}}{18} = \frac{-1 \pm \sqrt{5}}{6} \imp
 
 **Radio espectral:** $\rho(T_J) = \max|\lambda_i| = 0.539 < 1 \Rightarrow$ **Jacobi converge** para este sistema.
 
+Parte 2 — ¿Por qué buscar autovalores?
+El método converge si y solo si el radio espectral $\rho(T_J) = \max|\lambda_i| < 1$. Los autovalores te dicen si el método va a funcionar.
+
+Para encontrarlos resolvés $\det(T_J - \lambda I) = 0$. Desarrollando ese determinante llegás al polinomio:
+
+$$27\lambda^3 - 6\lambda + 1 = 0$$
+
+Ahí es donde entra Newton-Raphson para encontrar una raíz numéricamente. La semilla $\lambda^{(0)} = 1/3$ es razonable porque Gershgorin dice que $|\lambda| \leq 2/3$.
+
+Resulta que $\lambda = 1/3$ es raíz exacta (se verifica sustituyendo), así que NR converge al instante. Los tres autovalores son $1/3,\ 0.206,\ -0.539$, y como todos tienen $|\lambda| < 1$, Jacobi converge.
+
+Parte 3 — Una iteración de Gauss-Seidel
+Gauss-Seidel es como Jacobi, pero usa los valores nuevos en cuanto los calcula (en vez de esperar al final de la iteración).
+
+Semilla: $\mathbf{x}^{(0)} = [0,\ 0,\ 1]^T$
+
+
+x₁ nuevo = -x₃_viejo / 3 = -1/3
+
+x₂ nuevo = (-x₁_NUEVO - x₃_viejo) / 3      ← ya usa x₁ nuevo
+         = (1/3 - 1) / 3 = -2/9
+
+x₃ nuevo = (-x₁_NUEVO - x₂_NUEVO) / 3      ← ya usa x₁ y x₂ nuevos
+         = (1/3 + 2/9) / 3 = 5/27
+Resultado: $\mathbf{x}^{(1)} = [-0.333,\ -0.222,\ 0.185]^T$
+
+Como el sistema es $A\mathbf{x} = \mathbf{0}$ y el método converge, iterando sucesivamente llegarías a $\mathbf{x} = [0,\ 0,\ 0]^T$.
+
 ---
 
 ## 4b) Una iteración de Gauss-Seidel desde $\mathbf{x}^{(0)} = [0;\ 0;\ 1]^T$
@@ -225,9 +253,9 @@ $$\boxed{\mathbf{x}^{(1)} = \begin{bmatrix} -1/3 \\ -2/9 \\ 5/27 \end{bmatrix} \
 
 ## Resumen de resultados
 
-| Ejercicio | Resultado |
-|-----------|-----------|
-| 3a) RK2 (Heun, h=2) | $T(2) \approx \mathbf{375\ K}$ |
-| 3b) Euler Implícito (h=2) | $T(2) \approx \mathbf{367\ K}$ |
-| 4a) Autovalor de $T_J$ | $\lambda_1 = \mathbf{1/3}$, semilla $\lambda^{(0)} = 1/3$ (cero exacto) |
-| 4b) GS — 1 iteración | $\mathbf{x}^{(1)} = [-1/3,\ -2/9,\ 5/27]^T$ |
+| Ejercicio                 | Resultado                                                               |
+| ------------------------- | ----------------------------------------------------------------------- |
+| 3a) RK2 (Heun, h=2)       | $T(2) \approx \mathbf{375\ K}$                                          |
+| 3b) Euler Implícito (h=2) | $T(2) \approx \mathbf{367\ K}$                                          |
+| 4a) Autovalor de $T_J$    | $\lambda_1 = \mathbf{1/3}$, semilla $\lambda^{(0)} = 1/3$ (cero exacto) |
+| 4b) GS — 1 iteración      | $\mathbf{x}^{(1)} = [-1/3,\ -2/9,\ 5/27]^T$                             |
