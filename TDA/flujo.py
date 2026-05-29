@@ -497,3 +497,212 @@ def enviar_hijos(ciudad, casa, escuela, hijos=5):
         sum(flujos.get((s, esquina), 0) for esquina in ciudad.obtener_esquinas())
         >= hijos
     )
+
+
+"""14 Se está formando una nueva comisión de actividades culturales de un pueblo. Cada habitante es miembro de 0 o más clubes, y de exactamente 1 partido político. Cada grupo de interés debe nombrar a un representante ante la nueva comisión de actividades culturales, con las siguientes restricciones: cada partido político no puede tener más de 
+n
+/
+2
+n/2 simpatizantes en la comisión, cada persona puede representar a solo un club, cada club debe estar representado por un miembro. Implementar un algoritmo que dada la información de los habitantes (a qué clubes son miembros, a qué partido pertenecen), nos dé una lista de representantes válidos. Indicar y justificar la complejidad del algoritmo implementado.
+"""
+
+def representantes(personas):
+    red = Grafo(dirigido=True)
+    s = "s"
+    t = "t"
+    red.agregar_vertice(s)
+    red.agregar_vertice(t)
+
+    clubes= {}
+    for persona in personas:
+        for club in persona.clubes:
+            if club not in clubes:
+                clubes[club] = []
+            clubes[club].append(persona.nombre)
+    for club in clubes:
+        red.agregar_vertice("club_" + club)
+        red.agregar_arista(s, "club_" + club, 1)
+    
+    partidos_vistos = set()
+    for persona in personas:
+        red.agregar_vertice("persona_" + persona.nombre)
+        if persona.partido not in partidos_vistos:
+            red.agregar_vertice("partido_" + persona.partido)
+            red.agregar_arista("partido_" + persona.partido, t, len(personas) // 2)
+            partidos_vistos.add(persona.partido)
+        red.agregar_arista("persona_" + persona.nombre, "partido_" + persona.partido, 1)
+    
+    for club, integrantes in clubes.items():
+        for persona in integrantes:
+            red.agregar_arista("club_" + club, "persona_" + persona, 1)
+    flujos = flujo(red, s, t)
+    resultado = {}
+    for club, integrantes in clubes.items():
+        for persona in integrantes:
+            if flujos.get(("club_" + club, "persona_" + persona), 0) == 1:
+                resultado[persona] = club
+                break
+    if len(resultado) < len(clubes):
+        return None
+    return resultado
+
+        
+"""15 En un hospital, se tiene un conjunto de médicos y un conjunto de pacientes. Cada médico tiene un horario con franjas horarias disponibles para citas médicas y su área de especialidad, y cada paciente tiene sus franjas horaria disponibles para ir al médico, junto con la información de qué tipo de especialidad requiere. Nuestro objetivo es emparejar médicos con pacientes de manera que se maximice el número total de citas médicas programadas. Se puede asumir que cada visita médica dura una cuota de tiempo fija, y que los pacientes pueden ser a priori atendidos por cualquier médico que coincida con el área de especialidad que requieren. Implementar un algoritmo que resuelva dicho problema de manera eficiente. Indicar y justificar la complejidad del algoritmo implementado."""
+
+
+def medicos(pacientes, medicos):
+    red = Grafo(dirigido=True)
+    s = "s"
+    t = "t"
+    red.agregar_vertice(s)
+    red.agregar_vertice(t)
+    
+    for medico in medicos:
+        red.agregar_vertice("medico_" + medico.nombre)
+        red.agregar_arista(s, "medico_" + medico.nombre, len(medicos))
+        
+    for paciente in pacientes:
+        red.agregar_vertice("paciente_" + paciente.nombre)
+        red.agregar_arista("paciente_" + paciente.nombre, t, 1)
+    
+    for medico in medicos:
+        for paciente in pacientes:
+            if medico.especialidad == paciente.especialidad_requerida:
+                for franja in medico.franjas_disponibles:
+                    if franja in paciente.franjas_disponibles:
+                        red.agregar_arista("medico_" + medico.nombre, "paciente_" + paciente.nombre, 1)
+                        break
+    flujos = flujo(red, s, t)
+    asignacion = {}
+    for medico in medicos:
+        asignacion[medico] = []
+        for paciente in pacientes:
+            if flujos.get(("medico_" + medico.nombre, "paciente_" + paciente.nombre), 0) == 1:
+                asignacion[medico].append(paciente)
+    return asignacion
+
+"""16 Una red de satélites se construyó para permitir la comunicación entre una nave espacial y la tierra. Ciertos Satélites pueden intercambiar mensajes entre otros (ida y vuelta). Algunos con la tierra, otros con la nave espacial. Contamos con la red y se pide medir su robustez: ¿cuántos satélites (en el peor de los casos) se pueden romper que dejen incomunicada la nave con la tierra? ¿Cuáles? Utilizando redes de flujo, resolver el problema. Indicar y justificar la complejidad del algoritmo implementado. Recordar que esto último debe estar en las variables del problema."""
+
+def robustez_red(satelites, tierra, nave):
+    """
+    Retorna (cantidad, lista) del mínimo conjunto de satélites cuya falla
+    desconecta nave de tierra (corte mínimo de vértices).
+
+    Modelo — node splitting:
+      Cada satélite v  →  v_in --cap=1--> v_out
+      nave  →  v_in   cap=INF  si v se comunica con la nave
+      v_out →  tierra cap=INF  si v se comunica con la tierra
+      u_out →  v_in   cap=INF  para cada enlace satélite-satélite (bidireccional)
+
+    nave y tierra no se dividen porque no son satélites que puedan romperse.
+
+    Complejidad: O(S * (S + E))
+      S = cantidad de satélites, E = cantidad de enlaces entre satélites.
+      La red tiene O(S) nodos y O(S + E) aristas.
+      El flujo máximo es a lo sumo S, y cada BFS cuesta O(S + E),
+      por lo que Edmonds-Karp corre en O(S * (S + E)).
+      El BFS final del corte cuesta O(S + E). Total: O(S * (S + E)).
+    """
+    from collections import deque
+
+    INF = len(satelites) + 1
+
+    red = Grafo(dirigido=True)
+    red.agregar_vertice(nave)
+    red.agregar_vertice(tierra)
+
+    for sat in satelites:
+        red.agregar_vertice(sat.nombre + "_in")
+        red.agregar_vertice(sat.nombre + "_out")
+        red.agregar_arista(sat.nombre + "_in", sat.nombre + "_out", 1)
+
+    for sat in satelites:
+        if sat.comunica_con_nave:
+            red.agregar_arista(nave, sat.nombre + "_in", INF)
+        if sat.comunica_con_tierra:
+            red.agregar_arista(sat.nombre + "_out", tierra, INF)
+
+    for i in range(len(satelites)):
+        for j in range(i + 1, len(satelites)):
+            if satelites[i].pueden_comunicarse(satelites[j]):
+                red.agregar_arista(satelites[i].nombre + "_out", satelites[j].nombre + "_in", INF)
+                red.agregar_arista(satelites[j].nombre + "_out", satelites[i].nombre + "_in", INF)
+
+    flujos = flujo(red, nave, tierra)
+
+    # BFS en grafo residual para encontrar el conjunto alcanzable desde nave
+    pred = {v: [] for v in red.obtener_vertices()}
+    for v in red.obtener_vertices():
+        for w in red.adyacentes(v):
+            pred[w].append(v)
+
+    visitado = {nave}
+    cola = deque([nave])
+    while cola:
+        v = cola.popleft()
+        for w in red.adyacentes(v):
+            if w not in visitado and red.capacidad(v, w) - flujos.get((v, w), 0) > 0:
+                visitado.add(w)
+                cola.append(w)
+        for w in pred.get(v, []):
+            if w not in visitado and flujos.get((w, v), 0) > 0:
+                visitado.add(w)
+                cola.append(w)
+
+    # Satélites críticos: v_in alcanzable pero v_out no → la arista cap=1 está saturada
+    criticos = [
+        sat.nombre
+        for sat in satelites
+        if (sat.nombre + "_in") in visitado and (sat.nombre + "_out") not in visitado
+    ]
+
+    return len(criticos), criticos
+
+
+"""17 Tito trabaja para la mafia. Debe llevar en camiones de caudales el dinero recaudado por la organización a m cambiar deodo de devolver favores a diferentes estaciones de policía. Entre diferentes rutas puede tener que camión (para no ser fácilmente detectado), donde cada camión puede tener diferente capacidad. Además, en algunos puntos (escondites de la mafia) puede recoger más dinero.
+
+Tito entonces cuenta con un grafo dirigido con las diferentes rutas, y puntos donde pueda tener que ir cambiando de camión según como cambie de ruta. El grafo es pesado y las aristas tienen como peso la capacidad del camión de caudales a usar por esa ruta. En cada vértice tenemos un punto donde podría (o no) poder recoger dinero o tener que dejar un agradecimiento, lo cual está modelado con un valor $w(v)$ (si es positivo, al pasar por allí podemos recoger dinero, si es negativo es que debemos dejar un agradecimiento, si es 0, es simplemente un punto de cambio de camión y nada más). Tito puede comenzar cada recorrido desde donde desee, si bien tiene sentido ir empezando desde algún escondite. Usando redes de flujo, implementar un algoritmo que reciba dicho grafo y determine si es posible pagar todos los agradecimientos correspondientes. No es necesario indicar cómo serían los recorridos. Indicar y justificar la complejidad del algoritmo implementado. El análisis de la complejidad debe ser completo."""
+
+def tito(grafo, pesos):
+    """
+    Determina si es posible pagar todos los agradecimientos.
+
+    Modelo:
+      S → v  cap=pesos[v]   para cada v con pesos[v] > 0  (escondite: provee dinero)
+      v → T  cap=-pesos[v]  para cada v con pesos[v] < 0  (estación: requiere dinero)
+      u → v  cap=peso_arista para cada arista del grafo    (ruta con capacidad de camión)
+
+    La respuesta es sí ⟺ flujo_máximo == demanda_total
+    (todas las aristas hacia T quedan saturadas).
+
+    Complejidad: O(V * E)
+      V = vértices, E = aristas del grafo original.
+      La red tiene O(V) nodos y O(V + E) aristas.
+      El flujo máximo es a lo sumo sum(pesos positivos) ≤ V * max_peso.
+      Con Edmonds-Karp cada BFS cuesta O(V + E) y hay a lo sumo O(V * E) aumentos,
+      dando O(V * E * (V + E)). Para el caso típico con capacidades enteras y
+      flujo acotado por V: O(V * (V + E)).
+    """
+    red = Grafo(dirigido=True)
+    s = "s"
+    t = "t"
+    red.agregar_vertice(s)
+    red.agregar_vertice(t)
+
+    demanda_total = 0
+    for v in grafo.obtener_vertices():
+        red.agregar_vertice(v)
+        if pesos[v] > 0:
+            red.agregar_arista(s, v, pesos[v])
+        elif pesos[v] < 0:
+            red.agregar_arista(v, t, -pesos[v])
+            demanda_total += -pesos[v]
+
+    for arista in grafo.obtener_aristas():
+        origen, destino = arista
+        red.agregar_arista(origen, destino, grafo.peso(arista))
+
+    flujos = flujo(red, s, t)
+
+    flujo_total = sum(f for (a, _), f in flujos.items() if a == s)
+    return flujo_total >= demanda_total
