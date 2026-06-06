@@ -115,7 +115,55 @@ aristas del grafo, de tamaño a lo sumo k, tal que si eliminamos dichas aristas 
 Demostrar que FES es un problema NP-Completo. Recomendamos utilizar Vertex-Cover, partiendo desde un grafo no dirigido.
 También recomendamos pensar un poco en cómo demostramos en clase que Camino Hamiltoniano era NP-Completo a partir de
 Ciclo Hamiltoniano (o también similar a algo que seguramente debas pensar para el ejercicio 2).
+
+--- Demostración ---
+
+1. FES ∈ NP:
+   Certificado: el conjunto F de aristas a eliminar.
+   Verificación en poly: comprobar |F| ≤ k y que G \ F es acíclico (DFS, O(V+E)). ✓
+
+2. FES es NP-Hard: reducción desde Vertex Cover (VC), que es NP-Completo.
+
+   Construcción (VC ≤p FES):
+   Dado un grafo no dirigido G = (V, E) e integer k (instancia de VC),
+   construyo un grafo dirigido G' = (V', E') así:
+
+     - Por cada vértice v ∈ V: agrego nodos v_in y v_out, y la arista v_in → v_out  [arista-vértice]
+     - Por cada arista no dirigida (u,v) ∈ E: agrego u_out → v_in  y  v_out → u_in  [aristas-arco]
+
+   La instancia de FES es (G', k). La reducción es polinomial: O(V + E) nodos y aristas.
+
+   Observación estructural:
+   Todo ciclo en G' debe alternar entre aristas-vértice y aristas-arco.
+   En particular, todo ciclo pasa por al menos una arista-vértice (v_in → v_out),
+   ya que v_in solo tiene una arista saliente (→ v_out) y v_out solo tiene una entrante (v_in →).
+
+   Corrección (doble implicancia):
+
+   (→) Si G tiene un Vertex Cover S con |S| ≤ k,
+       defino F = { v_in → v_out : v ∈ S }.  |F| = |S| ≤ k.
+       Para cada ciclo C en G', los vértices que C visita forman un ciclo en G
+       (los arcos u_out→v_in corresponden a aristas (u,v) ∈ E).
+       Como S cubre todas las aristas de G, al menos un vértice del ciclo está en S,
+       por lo que su arista-vértice está en F y rompe C.
+       Entonces F es un FES válido de tamaño ≤ k. ✓
+
+   (←) Si G' tiene un FES F con |F| ≤ k,
+       primero muestro que puedo asumir WLOG que F solo contiene aristas-vértice:
+         Si F contiene una arista-arco u_out→v_in, todo ciclo que la use también
+         pasa por u_in→u_out (único camino para llegar a u_out).
+         Por lo tanto reemplazar u_out→v_in por u_in→u_out en F sigue siendo un FES válido
+         del mismo tamaño, con una arista-vértice en lugar de una arista-arco.
+       Luego de la transformación, F solo tiene aristas-vértice.
+       Defino S = { v : v_in→v_out ∈ F }.  |S| = |F| ≤ k.
+       Para cada arista (u,v) ∈ E, el 4-ciclo u_in→u_out→v_in→v_out→u_in existe en G'.
+       Como F lo rompe y solo contiene aristas-vértice, u_in→u_out ∈ F o v_in→v_out ∈ F,
+       es decir u ∈ S o v ∈ S. Entonces S cubre cada arista de G: S es un VC de tamaño ≤ k. ✓
+
+   Queda demostrado que VC ≤p FES. Como VC es NP-Completo, FES también lo es.
 """
+
+
 """4. Dado un grafo bipartito (no dirigido) donde cada vértice v tiene un valor positivo w(v) asociado, queremos obtener un Vertex Cover
 de suma mínima. Este problema es NP-Difícil, por lo que aplicaremos el siguiente algoritmo de aproximación:
     1. Inicializaremos resultado = ∅ como un conjunto vacío.
