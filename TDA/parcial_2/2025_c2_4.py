@@ -63,6 +63,8 @@ def es_posible_pagar_agradecimientos(grafo, w):
     
     return flujo_maximo == total_agradecimientos
 
+#la complejidad del algoritmo depende de la implementación del cálculo de flujo máximo. Si usamos el algoritmo de Edmonds-Karp, la complejidad sería O(V * E^2), donde V es el número de vértices y E el número de aristas en la red de flujo. Dado que la red tiene O(n) vértices (donde n es el número de vértices en el grafo original) y O(n^2) aristas (en el peor caso, cada vértice puede estar conectado a todos los demás), la complejidad total sería O(n^5).
+
 """3. El problema de Coloreo de Boquita se enuncia como: Dado un Grafo donde cada vértice tiene un peso w(v) positivo, se desea pintar
 cada vértice de un color diferente de entre 4 posibilidades: Azul, Amarillo, Rojo o Blanco. Ningún vértice puede tener el mismo color
 de un adyacente. Aquellos vértices pintados con Rojo o Blanco nos dan como penalidad el peso de dicho vértice (los pintados de Azul

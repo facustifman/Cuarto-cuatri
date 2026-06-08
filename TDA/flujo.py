@@ -474,29 +474,36 @@ def schedulear_vuelos(vuelos, tiempos, m, k):
     return sum(flujos.get((s, i), 0) for i in range(m)) <= k
 
 
-"""13 - arlos tiene un problema: sus 5 hijos no se soportan. Esto es a tal punto, que ni siquiera están dispuestos a caminar juntos para ir a la escuela. Incluso más: ¡tampoco quieren pasar por una cuadra por la que haya pasado alguno de sus hermanos! Sólo aceptan pasar por las esquinas, si es que algún otro pasó por allí. Por suerte, tanto la casa como la escuela quedan en esquinas, pero no está seguro si es posible enviar a sus 5 hijos a la misma escuela. No se puede asumir que la ciudad tenga alguna forma en específico, por ejemplo, no hay que asumir que todas las calles sean cuadradas. Utilizando lo visto en la materia, formular este problema y resolverlo. Indicar y justificar la complejidad del algoritmo."""
+"""13 - Carlos tiene un problema: sus 5 hijos no se soportan. Esto es a tal punto, que ni siquiera están dispuestos a caminar juntos para ir a la escuela. Incluso más: ¡tampoco quieren pasar por una cuadra por la que haya pasado alguno de sus hermanos! Sólo aceptan pasar por las esquinas, si es que algún otro pasó por allí. Por suerte, tanto la casa como la escuela quedan en esquinas, pero no está seguro si es posible enviar a sus 5 hijos a la misma escuela. No se puede asumir que la ciudad tenga alguna forma en específico, por ejemplo, no hay que asumir que todas las calles sean cuadradas. Utilizando lo visto en la materia, formular este problema y resolverlo. Indicar y justificar la complejidad del algoritmo."""
 
 
 def enviar_hijos(ciudad, casa, escuela, hijos=5):
+    """
+    Formulación: caminos arista-disjuntos en grafo no dirigido.
+
+    Cada cuadra (arista) tiene capacidad 1: a lo sumo un hijo puede usarla.
+    Los hijos SÍ pueden compartir esquinas (vértices), por lo que NO hace
+    falta split de vértices; solo necesitamos caminos arista-disjuntos.
+
+    Red de flujo:
+      - Por cada cuadra {u, v} del plano (arista no dirigida) se agregan
+        dos aristas dirigidas  u→v  y  v→u  con capacidad 1.
+      - source = casa,  sink = escuela.
+      - flujo_max ≥ 5  ⟺  existen 5 caminos arista-disjuntos  (Menger).
+
+    Complejidad:
+      Sean V = esquinas, E = cuadras.
+      La red tiene V vértices y 2E aristas dirigidas.
+      Solo necesitamos verificar flujo ≥ 5, por lo que el algoritmo
+      encuentra a lo sumo 5 caminos aumentantes con BFS, cada uno en O(V+E).
+      Total: O(5·(V+E)) = O(V+E).
+    """
     red = Grafo(dirigido=True)
-    s = casa
-    t = escuela
-    red.agregar_vertice(s)
-    red.agregar_vertice(t)
-    for esquina in ciudad.obtener_esquinas():
-        red.agregar_vertice(esquina)
-    for ady in ciudad.adyacentes(s):
-        red.agregar_arista(s, ady, hijos)
-    for ady in ciudad.adyacentes(t):
-        red.agregar_arista(ady, t, hijos)
     for esquina in ciudad.obtener_esquinas():
         for adyacente in ciudad.adyacentes(esquina):
             red.agregar_arista(esquina, adyacente, 1)
-    flujos = flujo(red, s, t)
-    return (
-        sum(flujos.get((s, esquina), 0) for esquina in ciudad.obtener_esquinas())
-        >= hijos
-    )
+    flujos = flujo(red, casa, escuela)
+    return sum(flujos.get((casa, v), 0) for v in red.adyacentes(casa)) >= hijos
 
 
 """14 Se está formando una nueva comisión de actividades culturales de un pueblo. Cada habitante es miembro de 0 o más clubes, y de exactamente 1 partido político. Cada grupo de interés debe nombrar a un representante ante la nueva comisión de actividades culturales, con las siguientes restricciones: cada partido político no puede tener más de 
