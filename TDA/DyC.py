@@ -66,11 +66,6 @@ def merge(izquierda, derecha):
 """9-Implementar una función (que utilice división y conquista) de complejidad O(n logn) que dado un arreglo de n números enteros devuelva true o false según si existe algún elemento que aparezca más de la mitad de las veces. Justificar el orden de la solución. Ejemplos:"""
 
 
-def mas_de_la_mitad(arr):
-    candidato = mas_de_la_mitad_rec(arr, 0, len(arr) - 1)
-    return contar_ocurrencias(arr, candidato, 0, len(arr) - 1) > len(arr) // 2
-
-
 def mas_de_la_mitad_rec(arr, izq, der):
     if izq == der:
         return arr[izq]
